@@ -39,8 +39,10 @@ DIS_LOOP:
     JMP     DIS_LOOP
 END_JMP JMP END
 
-; Example code that needs to be disassembled, starting at memory location $9000
+    ; Example code that needs to be disassembled, starting at memory location $9000
     INCLUDE 'dis_test.x68'   
+    
+    ; Extension files
     INCLUDE 'io.x68'
     INCLUDE 'strings.x68'
 
