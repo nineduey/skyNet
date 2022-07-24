@@ -32,7 +32,7 @@ CHECK_ASR:
     MOVE.L  #op_ASR,(OPCODE)
     JMP     EA_ASR
 CHECK_BCC:
-    CMP.W   #%
+    
 
 ELSE:
     MOVE.W  (A6),(DATA) ; Pass data to print

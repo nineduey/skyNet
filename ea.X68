@@ -13,7 +13,34 @@ EA_RTS:
     ADD.L   #2,A6 ; Increment the disassembly pointer by 1 word to next instruction
     RTS ; Return to main loop
 EA_ADD:
+    MOVE.L  #sym_NULL,(SIZE)
+    MOVE.L  #sym_NULL,(SOURCE)
+    MOVE.L  #sym_NULL,(DEST)
+    JSR     PRINT   
+    ADD.L   #2,A6
     RTS
+EA_AND:
+    MOVE.L  #sym_NULL,(SIZE)
+    MOVE.L  #sym_NULL,(SOURCE)
+    MOVE.L  #sym_NULL,(DEST)
+    JSR     PRINT   
+    ADD.L   #2,A6
+    RTS
+EA_ASL:
+    MOVE.L  #sym_NULL,(SIZE)
+    MOVE.L  #sym_NULL,(SOURCE)
+    MOVE.L  #sym_NULL,(DEST)
+    JSR     PRINT   
+    ADD.L   #2,A6
+    RTS
+EA_ASR:
+    MOVE.L  #sym_NULL,(SIZE)
+    MOVE.L  #sym_NULL,(SOURCE)
+    MOVE.L  #sym_NULL,(DEST)
+    JSR     PRINT   
+    ADD.L   #2,A6
+    RTS
+
 *~Font name~Courier New~
 *~Font size~10~
 *~Tab type~1~
