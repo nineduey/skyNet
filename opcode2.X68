@@ -17,8 +17,7 @@ CHECK_ADD:
     MOVE.W  (A6),D2
     LSR.W   #8,D2
     LSR.W   #4,D2
-    MOVE.W  D2,(A6)
-    CMP.W   #%0000000000001101,(A6)
+    CMP.W   #%0000000000001101,D2
     BNE     CHECK_AND  
     MOVE.L  #op_ADD,(OPCODE)
     JMP     EA_ADD
