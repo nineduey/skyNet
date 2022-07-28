@@ -26,20 +26,35 @@ EA_AND:
     JSR     PRINT   
     ADD.L   #2,A6
     RTS
-EA_ASL:
+EA_ASL_MEMORY:
     MOVE.L  #sym_NULL,(SIZE)
     MOVE.L  #sym_NULL,(SOURCE)
     MOVE.L  #sym_NULL,(DEST)
     JSR     PRINT   
     ADD.L   #2,A6
     RTS
-EA_ASR:
+EA_ASL_REGISTER:
     MOVE.L  #sym_NULL,(SIZE)
     MOVE.L  #sym_NULL,(SOURCE)
     MOVE.L  #sym_NULL,(DEST)
     JSR     PRINT   
     ADD.L   #2,A6
     RTS
+EA_ASR_REGISTER:
+    MOVE.L  #sym_NULL,(SIZE)
+    MOVE.L  #sym_NULL,(SOURCE)
+    MOVE.L  #sym_NULL,(DEST)
+    JSR     PRINT   
+    ADD.L   #2,A6
+    RTS
+EA_ASR_MEMORY:
+    MOVE.L  #sym_NULL,(SIZE)
+    MOVE.L  #sym_NULL,(SOURCE)
+    MOVE.L  #sym_NULL,(DEST)
+    JSR     PRINT   
+    ADD.L   #2,A6
+    RTS
+
 
 *~Font name~Courier New~
 *~Font size~10~

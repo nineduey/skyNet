@@ -23,22 +23,43 @@ CHECK_ADD:
     JMP     EA_ADD
     
 CHECK_AND:
-    CMP.W   #%1100,(A6)
-    BNE     CHECK_ASL
+    MOVE.W  (A6),D2
+    LSR.W   #8,D2
+    LSR.W   #4,D2
+    CMP.W   #%0000000000001100,D2
+    BNE     CHECK_ASL_REGISTER
     MOVE.L  #op_AND,(OPCODE)
     JMP     EA_AND
     
-CHECK_ASL:                      ; Instruction format is determined by a shift to the left
-    CMP.W   #%1110000111,(A6)
-    BNE     CHECK_ASR
+CHECK_ASL_REGISTER:                  
+    MOVE.W  (A6),D2
+    LSR.W   #6,D2
+    CMP.W   #%0000001110000111,D2
+    BNE     CHECK_ASL_MEMORY
     MOVE.L  #op_ASL,(OPCODE)
-    JMP     EA_ASL
+    JMP     EA_ASL_REGISTER
     
-CHECK_ASR:
+CHECK_ASL_MEMORY:                      
+    MOVE.W  (A6),D2
+    LSR.W   #6,D2
+    CMP.W   #%0000001110000111,D2
+    BNE     CHECK_ASR_REGISTER
+    MOVE.L  #op_ASL,(OPCODE)
+    JMP     EA_ASL_MEMORY  
+    
+CHECK_ASR_REGISTER:
     CMP.W   #%1110000011,(A6)   ; Instruction format is determined by a shift to the right
+    BNE     CHECK_ASR_MEMORY
+    MOVE.L  #op_ASR,(OPCODE)
+    JMP     EA_ASR_REGISTER
+    
+CHECK_ASR_MEMORY:
+    MOVE.W  (A6),D2
+    LSR.W   #6,D2
+    CMP.W   #%0000001110000011,D2   ; Instruction format is determined by a shift to the right
     BNE     CHECK_BCC
     MOVE.L  #op_ASR,(OPCODE)
-    JMP     EA_ASR
+    JMP     EA_ASR_MEMORY
     
 CHECK_BCC:
 
@@ -49,6 +70,7 @@ ELSE:
     RTS ; Return to main loop
 
 * 
+
 
 *~Font name~Courier New~
 *~Font size~10~
