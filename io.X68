@@ -5,8 +5,8 @@ SIZE        DCB.L  1,0 ; Address, will print whatever is at this address
 SOURCE      DCB.L  1,0 ; Address, will print whatever is at this address
 DEST        DCB.L  1,0 ; Address, will print whatever is at this address
 DATA        DCB.L  1,0 ; Raw data, not ASCII, will be converted to ASCII and printed
-ADDR_STR    DCB.B  9,0 ; Raw data
-DATA_STR    DCB.B  9,0 ; Raw data
+ADDR_STR    DCB.B 10,0 ; Raw data
+DATA_STR    DCB.B 10,0 ; Raw data
 SOURCE_STR  DCB.B 10,0 ; Raw data
 DEST_STR    DCB.B 10,0 ; Raw data
         NOP
@@ -90,7 +90,7 @@ CONVERT_TO_ASCII_W:
 CONVERT_TO_ASCII_IMMEDIATE:
         MOVEM.L D1-D4/A2-A3,-(SP)
         MOVE.W  D1,ADDRESS_TO_CONVERT
-        MOVE.B  #0,D2
+        CLR.L   D2
         MOVE.L  D1,D3
         
 IMM_LOOP:
@@ -188,6 +188,7 @@ PRINT_DATA:
         
         MOVEM.L (SP)+,D0-D1/A1
         RTS
+
 
 
 *~Font name~Courier New~

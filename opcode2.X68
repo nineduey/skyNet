@@ -7,53 +7,16 @@ CHECK_NOP:
                     ; Have to use JMP, Branch cannot go far away
 CHECK_RTS:
     CMP.W   #%0100111001110101,(A6)
-    BNE     CHECK_ADDA_W
+    BNE     CHECK_ADD
     MOVE.L  #op_RTS,(OPCODE)
     JMP     EA_RTS
 
-CHECK_ADDA_W:
-    ; Need to check only the left 4 bits
-    ; First four bits should be 1101
-    MOVE.W  (A6),D2
-    LSR.W   #8,D2
-    LSR.W   #4,D2
-    CMP.W   #%0000000000001101,D2
-    BNE     CHECK_ADD
-    CLR.L   D2
-    MOVE.W  (A6),D2
-    LSL.W   #7,D2
-    LSR.W   #8,D2
-    LSR.W   #5,D2
-    CMP.W   #%0000000000000011,D2
-    BNE     CHECK_ADDA_L
-    MOVE.L  #op_ADDA,(OPCODE)
-    JMP     EA_ADDA_W
-    
-CHECK_ADDA_L:
-    ; Need to check only the left 4 bits
-    ; First four bits should be 1101
-    MOVE.W  (A6),D2
-    LSR.W   #8,D2
-    LSR.W   #4,D2
-    CMP.W   #%0000000000001101,D2
-    BNE     CHECK_ADD
-    CLR.L   D2
-    MOVE.W  (A6),D2
-    LSL.W   #7,D2
-    LSR.W   #8,D2
-    LSR.W   #5,D2
-    CMP.W   #%0000000000000111,D2
-    BNE     CHECK_ADD
-    MOVE.L  #op_ADDA,(OPCODE)
-    JMP     EA_ADDA_L
-    
 CHECK_ADD:
     ; Need to check only the left 4 bits
     ; First four bits should be 1101
     MOVE.W  (A6),D2
-    LSR.W   #8,D2
-    LSR.W   #4,D2
-    CMP.W   #%0000000000001101,D2
+    AND.W   #$F000,D2
+    CMP.W   #%1101000000000000,D2
     BNE     CHECK_ADDQ
     MOVE.L  #op_ADD,(OPCODE)
     JMP     EA_ADD
@@ -74,48 +37,16 @@ CHECK_AND:
     LSR.W   #8,D2
     LSR.W   #4,D2
     CMP.W   #%0000000000001100,D2
-    BNE     CHECK_ASL_REGISTER
+    BNE     CHECK_SHIFT
     MOVE.L  #op_AND,(OPCODE)
     JMP     EA_AND
     
-CHECK_ASL_REGISTER:                  
-    MOVE.W  (A6),D2
-    LSR.W   #6,D2
-    CMP.W   #%0000001110000111,D2
-    BNE     CHECK_ASL_MEMORY
-    MOVE.L  #op_ASL,(OPCODE)
-    JMP     EA_ASL_REGISTER
-    
-CHECK_ASL_MEMORY:                      
-    MOVE.W  (A6),D2
-    LSR.W   #6,D2
-    CMP.W   #%0000001110000111,D2
-    BNE     CHECK_ASR_REGISTER
-    MOVE.L  #op_ASL,(OPCODE)
-    JMP     EA_ASL_MEMORY  
-    
-CHECK_ASR_REGISTER:
-    CMP.W   #%1110000011,(A6)   ; Instruction format is determined by a shift to the right
-    BNE     CHECK_ASR_MEMORY
-    MOVE.L  #op_ASR,(OPCODE)
-    JMP     EA_ASR_REGISTER
-    
-CHECK_ASR_MEMORY:
-    MOVE.W  (A6),D2
-    LSR.W   #6,D2
-    CMP.W   #%0000001110000011,D2   ; Instruction format is determined by a shift to the right
-    BNE     CHECK_LEA
-    MOVE.L  #op_ASR,(OPCODE)
-    JMP     EA_ASR_MEMORY
-    
-CHECK_LEA:
-    MOVE.W  (A6),D2
-    LSR.W   #8,D2
-    LSR.W   #4,D2
-    CMP.W   #%0000000000000100,D2
-    BNE     CHECK_MOVEA_W
-    MOVE.L  #op_LEA,(OPCODE)
-    JMP     EA_LEA
+CHECK_SHIFT:
+    MOVE.W  (A6), D2
+    AND.W   #$F000, D2
+    CMP.W   #%1110000000000000, D2
+    BNE     CHECK_SUB
+    JMP     EA_SHIFT
     
 CHECK_MOVEA_W:
     MOVE.W  (A6),D2
@@ -169,22 +100,49 @@ CHECK_SUB:
     LSR.W   #8,D2
     LSR.W   #4,D2
     CMP.W   #%0000000000001001,D2
-    BNE     CHECK_DIVS
+    BNE     CHECK_JSR
     MOVE.L  #op_SUB,(OPCODE)
     JMP     EA_SUB
+ 
+CHECK_JSR:
+    MOVE.W  (A6),D2
+    AND.W   #%1111111111000000,D2
+    CMP.W   #%0100111010000000,D2
+    BNE     CHECK_LEA
+    MOVE.L  #op_JSR,(OPCODE)
+    JMP     EA_JSR
     
-CHECK_DIVS:
+CHECK_LEA:
+    MOVE.W  (A6),D2
+    AND.W   #%1111000111000000,D2
+    CMP.W   #%0100000111000000,D2
+    BNE     CHECK_NOT
+    MOVE.L  #op_LEA,(OPCODE)
+    JMP     EA_LEA
+    
+CHECK_NOT:
+    MOVE.W  (A6),D2
+    AND.W   #%1111111100000000,D2
+    CMP.W   #%0100011000000000,D2
+    BNE     CHECK_BCC
+    MOVE.L  #op_NOT,(OPCODE)
+    JMP     EA_NOT
+    
+CHECK_BCC:
+    MOVE.W  (A6),D2
+    AND.W   #%1111000000000000,D2
+    CMP.W   #%0110000000000000,D2
+    BNE     CHECK_DATA
+    MOVE.L  #op_NOT,(OPCODE)
+    JMP     EA_BCC
+
     
 
-ELSE:
+CHECK_DATA:
     MOVE.W  (A6),(DATA) ; Pass data to print
     JSR     PRINT_DATA ; Print the data
     ADD.L   #2,A6 ; Increment the disassembly pointer by 1 word to next instruction
     RTS ; Return to main loop
-
-* 
-
-
 
 *~Font name~Courier New~
 *~Font size~10~
