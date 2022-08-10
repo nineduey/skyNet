@@ -5,12 +5,13 @@ CHECK_NOP:
     MOVE.L  #op_NOP,(OPCODE) ; Pass the NOP opcode
     JMP     EA_NOP  ; Jump to the EA subroutine for this OpCode (will be made by Amanda)
                     ; Have to use JMP, Branch cannot go far away
+                   
 CHECK_RTS:
     CMP.W   #%0100111001110101,(A6)
     BNE     CHECK_ADD
     MOVE.L  #op_RTS,(OPCODE)
     JMP     EA_RTS
-
+    
 CHECK_ADD:
     ; Need to check only the left 4 bits
     ; First four bits should be 1101
@@ -42,17 +43,18 @@ CHECK_AND:
     JMP     EA_AND
     
 CHECK_SHIFT:
-    MOVE.W  (A6), D2
+    MOVE.W  (A6),D2
     AND.W   #$F000, D2
     CMP.W   #%1110000000000000, D2
-    BNE     CHECK_SUB
+    BNE     CHECK_MOVEA_W
     JMP     EA_SHIFT
-    
+  
+  
 CHECK_MOVEA_W:
     MOVE.W  (A6),D2
     LSR.W   #6,D2
     LSL.W   #8,D2
-    LSL.W   #6,D2
+    LSL.W   #5,D2
     CMP.W   #%0010000000000000,D2
     BNE     CHECK_MOVEA_L
     MOVE.L  #op_MOVEA,(OPCODE)
@@ -62,7 +64,7 @@ CHECK_MOVEA_L:
     MOVE.W  (A6),D2
     LSR.W   #6,D2
     LSL.W   #8,D2
-    LSL.W   #6,D2
+    LSL.W   #5,D2
     CMP.W   #%0010000000000000,D2
     BNE     CHECK_MOVE_B
     MOVE.L  #op_MOVEA,(OPCODE)
@@ -132,17 +134,50 @@ CHECK_BCC:
     MOVE.W  (A6),D2
     AND.W   #%1111000000000000,D2
     CMP.W   #%0110000000000000,D2
-    BNE     CHECK_DATA
+    BNE     CHECK_BEQ
     MOVE.L  #op_NOT,(OPCODE)
     JMP     EA_BCC
 
+CHECK_BEQ
+    MOVE.W  (A6),D2
+    LSR.W   #8,D2
+    CMP.W   #%0000000001100111,D2
+    BNE     CHECK_BGT
+    MOVE.L  #op_BEQ,(OPCODE)
+    JMP     EA_BEQ
     
+CHECK_BGT
+    MOVE.W  (A6),D2
+    LSR.W   #8,D2
+    CMP.W   #%0000000001101110,D2
+    BNE     CHECK_BRA
+    MOVE.L  #op_BGT,(OPCODE)
+    JMP     EA_BGT
+    
+CHECK_BRA
+    MOVE.W  (A6),D2
+    LSR.W   #8,D2
+    CMP.W   #%0000000001100000,D2
+    BNE     CHECK_MOVEQ
+    MOVE.L  #op_BGT,(OPCODE)
+    JMP     EA_BRA
+    
+CHECK_MOVEQ:
+    MOVE.W  (A6),D2
+    LSR.W   #8,D2
+    LSR.W   #4,D2
+    CMP.W   #%0000000000000111,D2
+    BNE     CHECK_DATA
+    MOVE.L  #op_SUB,(OPCODE)
+    JMP     EA_MOVEQ
+
 
 CHECK_DATA:
     MOVE.W  (A6),(DATA) ; Pass data to print
     JSR     PRINT_DATA ; Print the data
     ADD.L   #2,A6 ; Increment the disassembly pointer by 1 word to next instruction
     RTS ; Return to main loop
+
 
 *~Font name~Courier New~
 *~Font size~10~

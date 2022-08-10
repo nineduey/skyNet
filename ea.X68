@@ -26,7 +26,7 @@ EA_ADDQ:
     JSR     GET_SIZE
     ;Get immediate value
     CLR     D1
-    MOVE.W  (A6), D1
+    MOVE.W  (A6),D1
     AND.W   #%0000111000000000, D1
     LSR.W   #8, D1
     LSR.W   #1, D1
@@ -79,6 +79,7 @@ EA_MOVEA_W:
     JSR     PRINT   
     ADD.L   #2,A6
     RTS
+
 EA_MOVEA_L:
     MOVE.L  #sym_NULL,(SIZE)
     MOVE.L  #sym_NULL,(SOURCE)
@@ -111,7 +112,7 @@ EA_JSR:
     RTS
     
 EA_LEA:
-    MOVE.W  (A6), D0
+    MOVE.W  (A6),D0
     AND.W   #%0000111000000000, D0
     LSR.W   #8, D0
     LSR.W   #1, D0
@@ -138,11 +139,43 @@ EA_BCC:
     JSR     PRINT
     ADD.L   #2,A6
     RTS
+
+EA_BEQ:
+    MOVE.L  #sym_NULL,(SIZE)
+    MOVE.L  #sym_NULL,(SOURCE)
+    MOVE.L  #sym_NULL,(DEST)
+    JSR     PRINT   
+    ADD.L   #2,A6
+    RTS
+    
+EA_BGT:
+    MOVE.L  #sym_NULL,(SIZE)
+    MOVE.L  #sym_NULL,(SOURCE)
+    MOVE.L  #sym_NULL,(DEST)
+    JSR     PRINT   
+    ADD.L   #2,A6
+    RTS
+    
+EA_BRA:
+    MOVE.L  #sym_NULL,(SIZE)
+    MOVE.L  #sym_NULL,(SOURCE)
+    MOVE.L  #sym_NULL,(DEST)
+    JSR     PRINT   
+    ADD.L   #2,A6
+    RTS
+    
+EA_MOVEQ:
+    MOVE.L  #sym_NULL,(SIZE)
+    MOVE.L  #sym_NULL,(SOURCE)
+    MOVE.L  #sym_NULL,(DEST)
+    JSR     PRINT   
+    ADD.L   #2,A6
+    RTS
     
 EA_SHIFT:
     JSR     GET_SHIFT
     JSR     GET_SIZE
-    MOVE.W  (A6), D0
+    MOVE.W  (A6),D0
     AND.W   #%0000000000000111, D0
     MOVE.L  #reg_SET_D, A0
     MOVE.L  #DEST, A5
@@ -255,40 +288,40 @@ GET_REGISTER_OFFSET:
 ;Deposits result into location that A5 points to
 GET_EFFECTIVE_ADDRESS:
     CLR     D2
-    MOVE.W  (A6), D2
+    MOVE.W  (A6),D2
     AND.W   #%0000000000111000, D2
 CHECK_EFFECTIVE_ADDRESS_DN:
     CMP.W   #%0000000000000000, D2
     BNE     CHECK_EFFECTIVE_ADDRESS_AN
-    MOVE.W  (A6), D0
+    MOVE.W  (A6),D0
     AND.W   #%0000000000000111, D0
     MOVE.L  #reg_SET_D, A0
     JMP     GET_REGISTER
 CHECK_EFFECTIVE_ADDRESS_AN:
     CMP.W   #%0000000000001000, D2
     BNE     CHECK_EFFECTIVE_ADDRESS_ANI
-    MOVE.W  (A6), D0
+    MOVE.W  (A6),D0
     AND.W   #%0000000000000111, D0
     MOVE.L  #reg_SET_A, A0
     JMP     GET_REGISTER
 CHECK_EFFECTIVE_ADDRESS_ANI:
     CMP.W   #%0000000000010000, D2
     BNE     CHECK_EFFECTIVE_ADDRESS_ANIPI
-    MOVE.W  (A6), D0
+    MOVE.W  (A6),D0
     AND.W   #%0000000000000111, D0
     MOVE.L  #reg_SET_Ai, A0
     JMP     GET_REGISTER
 CHECK_EFFECTIVE_ADDRESS_ANIPI:
     CMP.W   #%0000000000011000, D2
     BNE     CHECK_EFFECTIVE_ADDRESS_ANIPD
-    MOVE.W  (A6), D0
+    MOVE.W  (A6),D0
     AND.W   #%0000000000000111, D0
     MOVE.L  #reg_SET_Aipi, A0
     JMP     GET_REGISTER
 CHECK_EFFECTIVE_ADDRESS_ANIPD:
     CMP.W   #%0000000000100000, D2
     BNE     CHECK_EFFECTIVE_ADDRESS_OTHER
-    MOVE.W  (A6), D0
+    MOVE.W  (A6),D0
     AND.W   #%0000000000000111, D0
     MOVE.L  #reg_SET_Aipd, A0
     JMP     GET_REGISTER
@@ -296,14 +329,14 @@ CHECK_EFFECTIVE_ADDRESS_OTHER:
     CMP.W   #%0000000000111000, D2
     BNE     CHECK_EFFECTIVE_ADDRESS_ERROR
 CHECK_EFFECTIVE_ADDRESS_I:
-    MOVE.W  (A6), D2
+    MOVE.W  (A6),D2
     AND.W   #%0000000000000111, D2
     CMP.W   #%0000000000000100, D2
     BNE     CHECK_EFFECTIVE_ADDRESS_W
     MOVEA.L #DATA_STR, A1
     ADD.L   #2, A6 ;Increment to next word
     CLR     D1
-    MOVE.W  (A6), D1
+    MOVE.W  (A6),D1
     JSR     CONVERT_TO_ASCII_IMMEDIATE
     MOVE.L  #DATA_STR, (A5)
     RTS
@@ -313,7 +346,7 @@ CHECK_EFFECTIVE_ADDRESS_W:
     MOVEA.L #DATA_STR, A1
     ADD.L   #2, A6 ;Increment to next word
     CLR     D1
-    MOVE.W  (A6), D1
+    MOVE.W  (A6),D1
     JSR     CONVERT_TO_ASCII_W
     MOVE.L  #DATA_STR, (A5)
     RTS
@@ -322,7 +355,7 @@ CHECK_EFFECTIVE_ADDRESS_L:
     BNE     CHECK_EFFECTIVE_ADDRESS_ERROR
     MOVEA.L #DATA_STR, A1
     ADD.L   #2, A6 ;Increment to next word
-    MOVE.L  (A6), D1
+    MOVE.L  (A6),D1
     ADD.L   #2, A6 ;Add another word since it's L
     JSR     CONVERT_TO_ASCII_L
     MOVE.L  #DATA_STR, (A5)
@@ -334,7 +367,7 @@ CHECK_EFFECTIVE_ADDRESS_ERROR:
 GET_BRANCH:
     CLR.L   D0
     MOVE.L  #op_SET_BCC, A0
-    MOVE.W  (A6), D0
+    MOVE.W  (A6),D0
     AND.W   #%0000111100000000, D0
     LSR.W   #8, D0
     MULU.W  #8, D0
@@ -344,7 +377,7 @@ GET_BRANCH:
     
 GET_BRANCH_DISPLACEMENT:
     CLR.L   D0
-    MOVE.W  (A6), D0
+    MOVE.W  (A6),D0
     AND.W   #%0000000011111111, D0
     MOVE.L  A6, D1
     ADD.L   #1, D1
@@ -356,7 +389,7 @@ GET_BRANCH_DISPLACEMENT:
     
 GET_SIZE:
     CLR.L   D0
-    MOVE.W  (A6), D0
+    MOVE.W  (A6),D0
     AND.W   #%0000000011000000, D0
     LSR.W   #6, D0
     CMP.W   #4, D0
@@ -379,7 +412,7 @@ GET_SHIFT:
     ADD.L   #4,A7 ;Remove stack address due to JSR GET_REGISTER
     JMP     CHECK_DATA
 GET_SHIFT_CONTINUE:
-    MOVE.W  (A6), D0
+    MOVE.W  (A6),D0
     AND.W   #%0000000100011000, D0
     LSL.B   #3, D0
     LSR.W   #6, D0
@@ -391,10 +424,10 @@ GET_SHIFT_CONTINUE:
     
 GET_SHIFT_SOURCE:
     CLR.L   D0
-    MOVE.W  (A6), D0
+    MOVE.W  (A6),D0
     AND.W   #%0000000000100000, D0
     CLR.L   D1
-    MOVE.W  (A6), D1
+    MOVE.W  (A6),D1
     AND.W   #%0000111000000000, D1
     LSR.W   #8, D1
     LSR.W   #1, D1
@@ -406,12 +439,13 @@ GET_SHIFT_SOURCE_IMMEDIATE:
     MOVE.L  #SOURCE_STR, (SOURCE)
     RTS
 GET_SHIFT_SOURCE_REGISTER:
-    MOVE.L  D1, D0
+    MOVE.L  D1,D0
     MOVE.L  #reg_SET_D, A0
     MOVE.L  #SOURCE, A5
     JSR     GET_REGISTER
     RTS
     
+
 
 *~Font name~Courier New~
 *~Font size~10~
