@@ -45,57 +45,27 @@ CHECK_AND:
 CHECK_SHIFT:
     MOVE.W  (A6),D2
     AND.W   #$F000, D2
-    CMP.W   #%1110000000000000, D2
-    BNE     CHECK_MOVEA_W
+    CMP.W   #%1110000000000000,D2
+    BNE     CHECK_MOVEA
     JMP     EA_SHIFT
   
-  
-CHECK_MOVEA_W:
+CHECK_MOVEA:
     MOVE.W  (A6),D2
-    LSR.W   #6,D2
-    LSL.W   #8,D2
-    LSL.W   #5,D2
-    CMP.W   #%0010000000000000,D2
-    BNE     CHECK_MOVEA_L
+    AND.W   #%1100000111000000,D2
+    CMP.W   #%0000000001000000,D2
+    BNE     CHECK_MOVE
     MOVE.L  #op_MOVEA,(OPCODE)
-    JMP     EA_MOVEA_W
+    JMP     EA_MOVEA
+   
     
-CHECK_MOVEA_L:
+CHECK_MOVE:
     MOVE.W  (A6),D2
+    LSR.W   #8,D2
     LSR.W   #6,D2
-    LSL.W   #8,D2
-    LSL.W   #5,D2
-    CMP.W   #%0010000000000000,D2
-    BNE     CHECK_MOVE_B
-    MOVE.L  #op_MOVEA,(OPCODE)
-    JMP     EA_MOVEA_L
-    
-CHECK_MOVE_B:
-    MOVE.W  (A6),D2
-    LSR.W   #8,D2
-    LSR.W   #4,D2
-    CMP.W   #%0000000000000001,D2
-    BNE     CHECK_MOVE_W
-    MOVE.L  #op_MOVE,(OPCODE)
-    JMP     EA_MOVE_B
-    
-CHECK_MOVE_W:
-    MOVE.W  (A6),D2
-    LSR.W   #8,D2
-    LSR.W   #4,D2
-    CMP.W   #%0000000000000011,D2
-    BNE     CHECK_MOVE_L
-    MOVE.L  #op_MOVE,(OPCODE)
-    JMP     EA_MOVE_W
-    
-CHECK_MOVE_L:
-    MOVE.W  (A6),D2
-    LSR.W   #8,D2
-    LSR.W   #4,D2
-    CMP.W   #%0000000000000010,D2
+    CMP.W   #%0000000000000000,D2
     BNE     CHECK_SUB
     MOVE.L  #op_MOVE,(OPCODE)
-    JMP     EA_MOVE_L
+    JMP     EA_MOVE
 
 CHECK_SUB:
     MOVE.W  (A6),D2
@@ -159,7 +129,7 @@ CHECK_BRA
     LSR.W   #8,D2
     CMP.W   #%0000000001100000,D2
     BNE     CHECK_MOVEQ
-    MOVE.L  #op_BGT,(OPCODE)
+    MOVE.L  #op_BRA,(OPCODE)
     JMP     EA_BRA
     
 CHECK_MOVEQ:
@@ -167,16 +137,78 @@ CHECK_MOVEQ:
     LSR.W   #8,D2
     LSR.W   #4,D2
     CMP.W   #%0000000000000111,D2
-    BNE     CHECK_DATA
-    MOVE.L  #op_SUB,(OPCODE)
+    BNE     CHECK_MOVEM
+    MOVE.L  #op_MOVEQ,(OPCODE)
     JMP     EA_MOVEQ
 
+CHECK_MOVEM:
+    MOVE.W  (A6),D2
+    AND.W   #%1111101110000000,D2
+    CMP.W   #%0100100010000000,D2
+    BNE     CHECK_ASL
+    MOVE.L  #op_MOVEM,(OPCODE)
+    JMP     EA_MOVEM
+
+CHECK_ASL:
+    MOVE.W  (A6),D2
+    LSR.W   #8,D2
+    LSR.W   #4,D2
+    CMP.W   #%0000000000001110,D2
+    BNE     CHECK_ASR
+    MOVE.L  #op_ASL,(OPCODE)
+    JMP     EA_ASL
+    
+CHECK_ASR:
+    MOVE.W  (A6),D2
+    LSR.W   #8,D2
+    LSR.W   #4,D2
+    CMP.W   #%0000000000001110,D2
+    BNE     CHECK_LSL
+    MOVE.L  #op_ASR,(OPCODE)
+    JMP     EA_ASR
+
+CHECK_LSL:
+    MOVE.W  (A6),D2
+    LSR.W   #8,D2
+    LSR.W   #4,D2
+    CMP.W   #%0000000000001110,D2
+    BNE     CHECK_LSR
+    MOVE.L  #op_LSL,(OPCODE)
+    JMP     EA_LSL
+
+CHECK_LSR:
+    MOVE.W  (A6),D2
+    LSR.W   #8,D2
+    LSR.W   #4,D2
+    CMP.W   #%0000000000001110,D2
+    BNE     CHECK_ROL
+    MOVE.L  #op_LSR,(OPCODE)
+    JMP     EA_LSR
+    
+CHECK_ROL:
+    MOVE.W  (A6),D2
+    LSR.W   #8,D2
+    LSR.W   #4,D2
+    CMP.W   #%0000000000001110,D2
+    BNE     CHECK_ROR
+    MOVE.L  #op_ROL,(OPCODE)
+    JMP     EA_ROL
+    
+CHECK_ROR:
+    MOVE.W  (A6),D2
+    LSR.W   #8,D2
+    LSR.W   #4,D2
+    CMP.W   #%0000000000001110,D2
+    BNE     CHECK_DATA
+    MOVE.L  #op_ROR,(OPCODE)
+    JMP     EA_ROR
 
 CHECK_DATA:
     MOVE.W  (A6),(DATA) ; Pass data to print
     JSR     PRINT_DATA ; Print the data
     ADD.L   #2,A6 ; Increment the disassembly pointer by 1 word to next instruction
     RTS ; Return to main loop
+
 
 
 *~Font name~Courier New~
