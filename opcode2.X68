@@ -18,9 +18,19 @@ CHECK_ADD:
     MOVE.W  (A6),D2
     AND.W   #$F000,D2
     CMP.W   #%1101000000000000,D2
-    BNE     CHECK_ADDQ
+    BNE     CHECK_ADDA
     MOVE.L  #op_ADD,(OPCODE)
     JMP     EA_ADD
+
+CHECK_ADDA:
+    ; Need to check only the left 4 bits
+    ; First four bits should be 1101
+    MOVE.W  (A6),D2
+    AND.W   #$F000,D2
+    CMP.W   #%1101000000000000,D2
+    BNE     CHECK_ADDQ
+    MOVE.L  #op_ADDA,(OPCODE)
+    JMP     EA_ADDA
 
 CHECK_ADDQ:
     ; Need to check only the left 4 bits
